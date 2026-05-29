@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mundo Mágico: Pequeños Exploradores</title>
+  <style>
+    :root{--gd:#1b5e20;--g:#4caf50;--b:#2196f3;--o:#ff9800;--p:#9c27b0;--pk:#e91e63;--y:#ffeb3b;--font:'Comic Sans MS','Trebuchet MS',Arial,sans-serif;--sh:0 10px 24px rgba(0,0,0,0.13);}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{min-height:100vh;font-family:var(--font);background:linear-gradient(180deg,#b3e5fc 0%,#e1f5fe 35%,#c8e6c9 100%);color:#1a331e;overflow-x:hidden;}
+    button,input,select{font-family:var(--font);}
+
+    /* SPLASH */
+    #splash{position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#1a237e 0%,#4a148c 40%,#880e4f 100%);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;text-align:center;overflow-y:auto;}
+    .sp-deco{font-size:clamp(40px,8vw,72px);margin:20px 0 8px;animation:float 3s ease-in-out infinite;}
+    .sp-title{font-size:clamp(26px,5.5vw,58px);color:#fff;text-shadow:3px 3px 0 #ff4081,6px 6px 0 #ff9800;line-height:1.2;margin-bottom:8px;}
+    .sp-sub{font-size:clamp(13px,2.2vw,20px);color:#ffe082;margin-bottom:22px;font-weight:bold;}
+    @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+    .reg-card{background:rgba(255,255,255,0.14);border:3px solid rgba(255,255,255,0.38);border-radius:28px;padding:22px 26px;max-width:470px;width:100%;backdrop-filter:blur(5px);}
+    .reg-card h2{color:#fff;font-size:18px;margin-bottom:12px;}
+    .reg-in{width:100%;border:3px solid #ffca28;border-radius:13px;padding:10px 13px;font-size:15px;font-weight:bold;background:rgba(255,255,255,0.92);margin-bottom:9px;outline:none;}
+    .av-grid{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:8px 0;}
+    .av-btn{font-size:26px;background:rgba(255,255,255,0.18);border:3px solid transparent;border-radius:13px;padding:5px 9px;cursor:pointer;transition:.2s;}
+    .av-btn.sel{border-color:#ffea00;background:rgba(255,234,0,0.28);transform:scale(1.14);}
+    .btn-start{background:linear-gradient(135deg,#ff4081,#ff9800);color:#fff;border:none;border-radius:20px;padding:13px 30px;font-size:17px;font-weight:bold;box-shadow:0 6px 18px rgba(0,0,0,0.22);transition:.2s;margin-top:8px;cursor:pointer;}
+    .btn-start:hover{transform:translateY(-3px);}
+    .sp-credits{margin-top:18px;background:rgba(0,0,0,0.28);border-radius:14px;padding:10px 18px;font-size:11.5px;color:#ccc;max-width:470px;width:100%;line-height:1.7;}
+    .sp-credits strong{color:#fff;}
+
+    /* APP */
+    #app{display:none;max-width:1400px;margin:0 auto;padding:12px;}
+    .app-hdr{background:rgba(255,255,255,0.88);border:5px solid rgba(76,175,80,.7);border-radius:26px;padding:12px 18px;margin-bottom:12px;box-shadow:var(--sh);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;}
+    .app-title{font-size:clamp(18px,3vw,34px);color:var(--gd);text-shadow:2px 2px 0 #fff;line-height:1.2;}
+    .app-sub{font-size:13px;color:#388e3c;font-weight:bold;}
+    .hdr-r{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+    .pchip{background:#fff8e1;border:2px solid #ffb300;border-radius:18px;padding:7px 13px;font-weight:bold;font-size:14px;white-space:nowrap;}
+    .bhdr{border:none;border-radius:14px;padding:8px 13px;font-size:12px;font-weight:bold;color:#fff;cursor:pointer;transition:.2s;white-space:nowrap;}
+    .bhdr:hover{transform:translateY(-2px);}
+    .b-rank{background:linear-gradient(135deg,#8e24aa,#5e35b1);}
+    .b-prof{background:linear-gradient(135deg,#1565c0,#0288d1);}
+    .b-purp{background:linear-gradient(135deg,#2e7d32,#66bb6a);}
+    .b-chat{background:linear-gradient(135deg,#ff6f00,#ffa000);}
+    .b-chg{background:linear-gradient(135deg,#546e7a,#90a4ae);}
+    .b-git{background:linear-gradient(135deg,#6a1b9a,#9c27b0);}
+
+    /* NAV */
+    .lnav{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:12px;}
+    .lbtn{border:none;border-radius:16px;padding:8px 13px;font-size:13px;font-weight:bold;color:#fff;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.14);transition:.2s;}
+    .lbtn:hover{transform:translateY(-2px);}
+    .lbtn.active{transform:scale(1.08);outline:4px solid rgba(255,255,255,.75);}
+    .lb0{background:linear-gradient(135deg,#e91e63,#ad1457);}
+    .lb1{background:linear-gradient(135deg,#9c27b0,#6a1b9a);}
+    .lb2{background:linear-gradient(135deg,#3f51b5,#1a237e);}
+    .lb3{background:linear-gradient(135deg,#0288d1,#01579b);}
+    .lb4{background:linear-gradient(135deg,#00897b,#004d40);}
+    .lb5{background:linear-gradient(135deg,#43a047,#1b5e20);}
+    .lb6{background:linear-gradient(135deg,#f57f17,#e65100);}
+    .lb7{background:linear-gradient(135deg,#d84315,#b71c1c);}
+    .lb8{background:linear-gradient(135deg,#6d4c41,#3e2723);}
+
+    /* JUEGO */
+    .glayout{display:grid;grid-template-columns:1fr 310px;gap:14px;}
+    @media(max-width:1024px){.glayout{grid-template-columns:1fr;}}
+    .bcard{background:rgba(255,255,255,.92);border:5px solid var(--g);border-radius:26px;box-shadow:var(--sh);overflow:hidden;display:flex;flex-direction:column;position:relative;}
+    .bhd{background:linear-gradient(135deg,#e8f5e9,#fff);padding:13px 17px;border-bottom:4px solid rgba(76,175,80,.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+    .tbadge{background:#fff8e1;border:2px solid #ffb300;padding:4px 11px;border-radius:13px;font-weight:bold;color:#ff8f00;font-size:13px;}
+    .pills{display:flex;gap:7px;}
+    .pill{background:#fff;border:3px solid var(--g);border-radius:16px;padding:4px 11px;font-weight:bold;font-size:14px;}
+    .arena{min-height:420px;position:relative;background:linear-gradient(180deg,#e0f7fa 0%,#fff 55%,#e8f5e9 100%);padding:14px;display:flex;flex-direction:column;justify-content:space-between;}
+    .svgc{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+    .dwrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;z-index:2;}
+    .tz{background:rgba(255,255,255,.9);border:4px dashed #81c784;border-radius:20px;min-height:120px;padding:10px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;transition:.25s;}
+    .tz.dov{transform:scale(1.06);background:#fffde7;border-color:var(--o);}
+    .ti{font-size:36px;line-height:1;}
+    .tn{font-size:15px;font-weight:bold;margin:3px 0 5px;}
+    .tcol{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;min-height:28px;}
+    .mini{font-size:20px;animation:pop .3s cubic-bezier(.175,.885,.32,1.275);}
+    .pwrap{background:rgba(255,255,255,.7);border-radius:16px;padding:12px;margin-top:12px;z-index:2;}
+    .phint{text-align:center;font-weight:bold;color:var(--gd);margin-bottom:8px;font-size:14px;}
+    .ipool{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:75px;align-items:center;}
+    .dcard{background:#fff;border:3px solid #e0e0e0;border-radius:16px;width:95px;height:85px;box-shadow:0 5px 12px rgba(0,0,0,.13);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:grab;user-select:none;touch-action:none;transition:.15s;}
+    .dcard:active{cursor:grabbing;}
+    .dcard.dragging{position:fixed;z-index:9999;pointer-events:none;transform:scale(1.12) rotate(-2deg);box-shadow:0 16px 32px rgba(0,0,0,.24);}
+    .dcard.placed{opacity:.22;pointer-events:none;transform:scale(.82);}
+    .dem{font-size:30px;line-height:1;}
+    .dlb{font-size:11px;font-weight:bold;margin-top:3px;color:#37474f;text-align:center;}
+
+    /* SIDEBAR */
+    .sb{background:rgba(255,255,255,.92);border:5px solid var(--g);border-radius:26px;padding:16px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:9px;}
+    .sbt{font-size:18px;color:var(--gd);font-weight:bold;text-align:center;}
+    .stbox{background:#f1f8e9;border:2px solid #c5e1a5;border-radius:14px;padding:8px;text-align:center;}
+    .sl{font-size:11px;color:#558b2f;font-weight:bold;}
+    .sv{font-size:22px;font-weight:bold;color:#33691e;}
+    .fbbox{background:#fff9c4;border:3px solid #fbc02d;border-radius:14px;padding:12px;text-align:center;font-weight:bold;min-height:65px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#5d4037;}
+    .pbwrap{background:#e8f5e9;border-radius:18px;height:13px;overflow:hidden;border:2px solid #a5d6a7;}
+    .pbfill{height:100%;background:linear-gradient(90deg,#4caf50,#8bc34a);border-radius:18px;transition:.4s;}
+    .wlist{display:flex;flex-direction:column;gap:5px;}
+    .witem{display:flex;justify-content:space-between;align-items:center;font-size:12px;background:#fafafa;border:1.5px solid #e0e0e0;border-radius:9px;padding:4px 9px;}
+    .wdone{color:#2e7d32;font-weight:bold;}
+    .wpend{color:#9e9e9e;}
+    .bact{border:none;border-radius:14px;padding:11px;font-size:14px;font-weight:bold;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.1);cursor:pointer;transition:.2s;}
+    .bact:hover{transform:translateY(-2px);}
+    .bnxt{background:linear-gradient(135deg,#4caf50,#2e7d32);}
+    .brst{background:linear-gradient(135deg,#ffa726,#f57c00);}
+
+    /* MODALES */
+    .mov{position:fixed;inset:0;background:rgba(0,0,0,.54);z-index:10000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:10px;}
+    .mov.active{opacity:1;pointer-events:auto;}
+    .mwin{background:#fff;border-radius:26px;width:100%;max-width:660px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 18px 48px rgba(0,0,0,.28);animation:scUp .3s cubic-bezier(.175,.885,.32,1.275);}
+    .mhd{padding:13px 18px;background:#e3f2fd;border-bottom:4px solid #1e88e5;border-radius:26px 26px 0 0;display:flex;justify-content:space-between;align-items:center;}
+    .mhd h2{color:#0d47a1;font-size:18px;}
+    .mbody{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;flex:1;}
+    .mfoot{padding:11px 14px;background:#f5f5f5;border-top:3px solid #e0e0e0;border-radius:0 0 26px 26px;display:flex;gap:7px;flex-wrap:wrap;}
+    .bcls{border:none;border-radius:12px;padding:7px 13px;background:#ef5350;color:#fff;font-weight:bold;font-size:13px;cursor:pointer;}
+    .rcrd{background:#fff;border-radius:16px;padding:9px 13px;border:3px solid #90caf9;display:flex;align-items:center;gap:9px;}
+    .rnum{font-size:20px;font-weight:900;width:34px;height:34px;background:#e3f2fd;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#0d47a1;flex-shrink:0;}
+    .rname{font-weight:bold;font-size:14px;color:#1565c0;}
+    .rsub{font-size:11px;color:#546e7a;}
+    .rstats{display:flex;gap:7px;margin-top:2px;font-size:11px;font-weight:bold;flex-wrap:wrap;}
+
+    /* PROFE */
+    .pwin{background:#fff;border-radius:26px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 18px 48px rgba(0,0,0,.3);animation:scUp .3s cubic-bezier(.175,.885,.32,1.275);}
+    .phd{padding:13px 18px;background:#e8f5e9;border-bottom:4px solid #43a047;border-radius:26px 26px 0 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:7px;}
+    .pfilt{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px;}
+    .pin{border:2px solid #a5d6a7;border-radius:11px;padding:7px 11px;font-size:13px;outline:none;}
+    .ptbl{width:100%;border-collapse:collapse;font-size:12px;}
+    .ptbl th{background:#e8f5e9;color:#1b5e20;padding:7px 9px;text-align:left;border-bottom:2px solid #a5d6a7;}
+    .ptbl td{padding:6px 9px;border-bottom:1px solid #f1f8e9;}
+    .ptbl tr:hover td{background:#f9fbe7;}
+    .bdel{background:#ef5350;color:#fff;border:none;border-radius:9px;padding:3px 9px;font-size:11px;font-weight:bold;cursor:pointer;}
+    .bexp{background:linear-gradient(135deg,#0288d1,#01579b);color:#fff;border:none;border-radius:13px;padding:8px 14px;font-size:12px;font-weight:bold;cursor:pointer;transition:.2s;}
+    .bexp:hover{transform:translateY(-1px);}
+
+    /* PROPÓSITO */
+    .prow{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1.5px solid #f3e5f5;}
+    .pico{font-size:26px;width:36px;text-align:center;flex-shrink:0;}
+    .pnm{font-weight:bold;font-size:13px;color:#4a148c;}
+    .pds{font-size:12px;color:#555;margin-top:2px;}
+
+    /* CHAT */
+    .cwin{background:#fff;border-radius:26px;width:100%;max-width:460px;max-height:84vh;display:flex;flex-direction:column;box-shadow:0 18px 48px rgba(0,0,0,.28);animation:scUp .3s cubic-bezier(.175,.885,.32,1.275);}
+    .chd{padding:13px 18px;background:#fff3e0;border-bottom:4px solid #ff9800;border-radius:26px 26px 0 0;display:flex;justify-content:space-between;align-items:center;}
+    .cmsgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;}
+    .cbbl{max-width:78%;border-radius:16px;padding:9px 13px;font-size:13px;line-height:1.5;}
+    .cbot{background:#fff3e0;border:2px solid #ffb74d;align-self:flex-start;}
+    .cusr{background:#e3f2fd;border:2px solid #64b5f6;align-self:flex-end;}
+    .cqk{display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 8px;}
+    .cqb{background:#fff3e0;border:2px solid #ffcc80;border-radius:13px;padding:4px 10px;font-size:11px;font-weight:bold;color:#e65100;cursor:pointer;}
+    .cqb:hover{background:#ffe0b2;}
+    .cir{display:flex;gap:7px;padding:10px;border-top:3px solid #ffe0b2;}
+    .ci{flex:1;border:2px solid #ffcc80;border-radius:13px;padding:8px 11px;font-size:13px;outline:none;}
+    .bsnd{background:#ff9800;color:#fff;border:none;border-radius:13px;padding:8px 14px;font-weight:bold;cursor:pointer;}
+
+    /* PWD */
+    .pwdc{background:#fff;border-radius:22px;padding:26px;max-width:320px;width:100%;text-align:center;box-shadow:0 14px 36px rgba(0,0,0,.22);}
+    .pwdc h3{color:#1565c0;margin-bottom:14px;font-size:18px;}
+    .pwdi{width:100%;border:3px solid #90caf9;border-radius:13px;padding:9px;font-size:16px;margin-bottom:11px;outline:none;text-align:center;letter-spacing:4px;}
+    .bpwd{background:linear-gradient(135deg,#1565c0,#0288d1);color:#fff;border:none;border-radius:13px;padding:10px 26px;font-size:15px;font-weight:bold;cursor:pointer;}
+
+    /* GITHUB */
+    .gwin{background:#fff;border-radius:26px;width:100%;max-width:540px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 18px 48px rgba(0,0,0,.28);animation:scUp .3s cubic-bezier(.175,.885,.32,1.275);}
+    .ghd{padding:13px 18px;background:#f3e5f5;border-bottom:4px solid #9c27b0;border-radius:26px 26px 0 0;display:flex;justify-content:space-between;align-items:center;}
+    .grow{display:flex;gap:11px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f3e5f5;}
+    .gnum{background:#9c27b0;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;flex-shrink:0;}
+    .gtxt{font-size:13px;color:#333;line-height:1.5;}
+
+    /* TOAST & CONFETTI */
+    .toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,150%);background:#fff;border:5px solid #ffca28;padding:13px 26px;border-radius:22px;font-weight:bold;font-size:17px;z-index:20000;box-shadow:0 10px 26px rgba(0,0,0,.2);transition:transform .3s cubic-bezier(.175,.885,.32,1.275);}
+    .toast.on{transform:translate(-50%,0);}
+    .clayer{position:fixed;inset:0;pointer-events:none;z-index:19000;}
+    .cp{position:absolute;width:11px;height:11px;border-radius:3px;animation:fall 2s linear forwards;}
+    .cred{position:fixed;bottom:7px;left:7px;background:rgba(255,255,255,.87);border:2px solid var(--g);padding:4px 10px;border-radius:11px;font-size:10.5px;font-weight:bold;color:var(--gd);z-index:9000;line-height:1.6;}
+
+    @keyframes pop{0%{transform:scale(.3);opacity:0;}100%{transform:scale(1);opacity:1;}}
+    @keyframes fall{0%{transform:translateY(-20px) rotate(0);opacity:1;}100%{transform:translateY(105vh) rotate(360deg);opacity:0;}}
+    @keyframes scUp{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+    @media(max-width:600px){.dwrap{grid-template-columns:1fr 1fr;}.dcard{width:78px;height:70px;}.dem{font-size:24px;}}
+  </style>
+</head>
+<body>
+<div class="clayer" id="cl"></div>
+<div class="toast" id="toast">¡Genial!</div>
+<div class="cred">🌟 Danis Orozco &amp; Julieth Velasquez<br><span style="font-weight:normal">Lic. Ed. Infantil · 2026</span></div>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="sp-deco">🌈✨🌟</div>
+  <h1 class="sp-title">🌍 Mundo Mágico<br>Pequeños Exploradores</h1>
+  <p class="sp-sub">¡Explora, descubre y aprende en cada rincón mágico!</p>
+  <div class="reg-card">
+    <h2>👤 ¡Hola explorador! Dinos quién eres</h2>
+    <input class="reg-in" id="rName" placeholder="✏️ Tu nombre..." maxlength="24"/>
+    <select class="reg-in" id="rGroup">
+      <option value="">📚 Selecciona tu grupo</option>
+      <option>Prejardín A</option><option>Prejardín B</option>
+      <option>Jardín A</option><option>Jardín B</option>
+      <option>Transición A</option><option>Transición B</option>
+      <option>Primero A</option><option>Primero B</option>
+    </select>
+    <div style="color:#ffe082;font-size:12px;font-weight:bold;margin-bottom:5px;">🐾 Elige tu avatar:</div>
+    <div class="av-grid" id="avGrid"></div>
+    <div style="color:#ffe082;font-size:11px;margin:8px 0 3px;">¿Ya jugaste antes?</div>
+    <select class="reg-in" id="prevSel" onchange="loadPrev()"><option value="">— Jugadores guardados —</option></select>
+    <button class="btn-start" onclick="startApp()">🚀 ¡Empezar la Aventura!</button>
+  </div>
+  <div class="sp-credits">
+    <strong>Elaborado por:</strong> Danis Nathalia Orozco Vasquez &amp; Julieth Saray Velasquez Canchila<br>
+    <strong>Programa:</strong> Licenciatura en Educación Infantil<br>
+    <strong>Asignatura:</strong> Las TIC como Mediación Pedagógica en la Infancia<br>
+    <strong>Docente:</strong> Jose Javier Zapata Polo &nbsp;|&nbsp; <strong>Año:</strong> 2026
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="app-hdr">
+    <div>
+      <div class="app-title">🌈 Mundo Mágico: Pequeños Exploradores</div>
+      <div class="app-sub">¡Explora, descubre y aprende en cada rincón mágico!</div>
+    </div>
+    <div class="hdr-r">
+      <div class="pchip" id="pchip">🌟 Explorador</div>
+      <button class="bhdr b-purp" onclick="openM('mPurp')">📚 Propósito</button>
+      <button class="bhdr b-rank" onclick="openRank()">🏆 Ranking</button>
+      <button class="bhdr b-prof" onclick="openProfe()">🎓 Panel Profe</button>
+      <button class="bhdr b-chat" onclick="openM('mChat')">🤖 Explorín</button>
+      <button class="bhdr b-git" onclick="openM('mGit')">🚀 GitHub</button>
+      <button class="bhdr b-chg" onclick="goSplash()">🔄 Cambiar</button>
+    </div>
+  </header>
+  <nav class="lnav" id="lnav"></nav>
+  <main class="glayout">
+    <section class="bcard">
+      <svg class="svgc" id="svg"></svg>
+      <div class="bhd">
+        <div>
+          <span class="tbadge" id="tbadge">Tema</span>
+          <div style="font-size:13px;font-weight:bold;color:#388e3c;margin-top:3px;" id="instrTxt">Instrucción</div>
+        </div>
+        <div class="pills">
+          <div class="pill" style="border-color:#ffca28;background:#fffde7;">⭐<span id="stDisp">0</span></div>
+          <div class="pill">✅<span id="hDisp">0</span>/<span id="tDisp">0</span></div>
+        </div>
+      </div>
+      <div class="arena" id="arena">
+        <div class="dwrap" id="dwrap"></div>
+        <div class="pwrap">
+          <div class="phint" id="phint">👇 ¡Arrastra al lugar correcto!</div>
+          <div class="ipool" id="ipool"></div>
+        </div>
+      </div>
+    </section>
+    <aside class="sb">
+      <div class="sbt">📊 Panel de Logros</div>
+      <div class="stbox"><div class="sl">PUNTOS</div><div class="sv" id="scDisp">0</div></div>
+      <div class="stbox"><div class="sl">INTENTOS</div><div class="sv" id="trDisp">0</div></div>
+      <div>
+        <div class="sl" style="margin-bottom:3px;">AVANCE GENERAL</div>
+        <div class="pbwrap"><div class="pbfill" id="pbar" style="width:0%"></div></div>
+        <div style="text-align:right;font-size:11px;color:#558b2f;margin-top:2px;"><span id="pct">0</span>%</div>
+      </div>
+      <div class="fbbox" id="fbbox">¡Hola! Selecciona un mundo para comenzar 🌟</div>
+      <div style="font-size:12px;font-weight:bold;color:var(--gd);">🗺️ Mundos:</div>
+      <div class="wlist" id="wlist"></div>
+      <button class="bact bnxt" onclick="nextLv()">➡️ Siguiente mundo</button>
+      <button class="bact brst" onclick="restartLv()">🔄 Reiniciar</button>
+    </aside>
+  </main>
+</div>
+
+<!-- RANKING -->
+<div class="mov" id="mRank">
+  <div class="mwin">
+    <div class="mhd"><h2>🏆 Ranking — Pequeños Exploradores</h2><button class="bcls" onclick="closeM('mRank')">✖</button></div>
+    <div class="mbody" id="rankBody"></div>
+    <div class="mfoot">
+      <button class="bact brst" style="flex:1" onclick="clearRank()">🗑️ Borrar</button>
+      <button class="bact bnxt" style="flex:1" onclick="closeM('mRank')">¡Listo!</button>
+    </div>
+  </div>
+</div>
+
+<!-- PWD -->
+<div class="mov" id="mPwd">
+  <div class="pwdc">
+    <h3>🔐 Panel Docente</h3>
+    <p style="font-size:12px;color:#546e7a;margin-bottom:12px;">Ingresa la clave de acceso</p>
+    <input class="pwdi" id="pwdIn" type="password" placeholder="••••••" maxlength="20" onkeydown="if(event.key==='Enter')chkPwd()"/>
+    <br><button class="bpwd" onclick="chkPwd()">Entrar</button>
+    <div id="pwdErr" style="color:#e53935;font-size:12px;margin-top:7px;"></div>
+    <div style="margin-top:10px;"><button class="bcls" onclick="closeM('mPwd')">Cancelar</button></div>
+  </div>
+</div>
+
+<!-- PROFE -->
+<div class="mov" id="mProfe">
+  <div class="pwin">
+    <div class="phd">
+      <h2 style="color:#1b5e20;font-size:17px;">🎓 Panel Docente — Seguimiento de Estudiantes</h2>
+      <button class="bcls" onclick="closeM('mProfe')">✖</button>
+    </div>
+    <div class="mbody">
+      <div class="pfilt">
+        <input class="pin" id="psrch" placeholder="🔍 Buscar nombre..." oninput="renderProfe()"/>
+        <select class="pin" id="pgrp" onchange="renderProfe()"><option value="">Todos los grupos</option></select>
+        <select class="pin" id="psort" onchange="renderProfe()">
+          <option value="stars">⭐ Estrellas</option>
+          <option value="score">🏅 Puntaje</option>
+          <option value="name">📝 Nombre</option>
+          <option value="date">📅 Fecha</option>
+          <option value="prog">📊 Avance</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="ptbl">
+          <thead><tr><th>#</th><th>Av.</th><th>Nombre</th><th>Grupo</th><th>Mundos</th><th>⭐</th><th>Pts</th><th>Int.</th><th>%</th><th>Fecha</th><th></th></tr></thead>
+          <tbody id="ptbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="bexp" onclick="expCSV()">📄 CSV</button>
+      <button class="bexp" onclick="expJSON()">📦 JSON</button>
+      <button class="bact brst" onclick="clearAll()">🗑️ Borrar todo</button>
+      <button class="bact bnxt" onclick="closeM('mProfe')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROPÓSITO -->
+<div class="mov" id="mPurp">
+  <div class="mwin" style="max-width:580px;">
+    <div class="mhd" style="background:#e8eaf6;border-bottom-color:#5c6bc0;"><h2 style="color:#1a237e;">📚 Propósito Didáctico</h2><button class="bcls" onclick="closeM('mPurp')">✖</button></div>
+    <div class="mbody">
+      <p style="font-size:13px;background:#e8eaf6;border-radius:11px;padding:11px;line-height:1.6;color:#333;">Desarrolla habilidades cognitivas, lingüísticas y motoras en niños de <strong>3 a 6 años</strong> mediante actividades interactivas de <strong>arrastrar y soltar</strong>, y <strong>unir con flechas</strong>.</p>
+      <div style="font-weight:bold;color:#4a148c;margin:8px 0 3px;font-size:14px;">Habilidades que fortalece:</div>
+      <div class="prow"><div class="pico">✋</div><div><div class="pnm">Motricidad fina</div><div class="pds">Los niños desarrollan coordinación ojo-mano al arrastrar, seleccionar y organizar elementos dentro de las actividades.</div></div></div>
+      <div class="prow"><div class="pico">🧠</div><div><div class="pnm">Pensamiento lógico</div><div class="pds">Relacionan imágenes, secuencias, colores, tamaños y categorías para resolver pequeños retos.</div></div></div>
+      <div class="prow"><div class="pico">👁️</div><div><div class="pnm">Atención y concentración</div><div class="pds">Observan detalles, siguen instrucciones y toman decisiones durante cada juego.</div></div></div>
+      <div class="prow"><div class="pico">↔️</div><div><div class="pnm">Lateralidad y orientación espacial</div><div class="pds">Reconocen derecha, izquierda, arriba, abajo y posiciones dentro del espacio.</div></div></div>
+      <div class="prow"><div class="pico">🧩</div><div><div class="pnm">Asociación y clasificación</div><div class="pds">Agrupan objetos según características como color, forma, tamaño o cantidad.</div></div></div>
+      <div class="prow"><div class="pico">🇬🇧</div><div><div class="pnm">Iniciación al inglés</div><div class="pds">Aprenden palabras básicas en inglés relacionadas con colores, números, animales y objetos cotidianos mediante imágenes y juegos interactivos.</div></div></div>
+      <div class="prow"><div class="pico">⭐</div><div><div class="pnm">Aprendizaje significativo</div><div class="pds">Reciben retroalimentación inmediata mediante sonidos, estrellas, mensajes positivos y animaciones motivadoras.</div></div></div>
+      <div class="prow" style="border:none"><div class="pico">🎨</div><div><div class="pnm">Creatividad e imaginación</div><div class="pds">Exploran un entorno visual colorido y mágico que estimula la curiosidad y el interés por aprender.</div></div></div>
+    </div>
+    <div class="mfoot"><button class="bact bnxt" onclick="closeM('mPurp')">¡Entendido!</button></div>
+  </div>
+</div>
+
+<!-- CHAT CHISPITAS -->
+<div class="mov" id="mChat">
+  <div class="cwin">
+    <div class="chd"><h2 style="color:#e65100;font-size:17px;">🤖 Asistente Explorín</h2><button class="bcls" style="background:#ff9800" onclick="closeM('mChat')">✖</button></div>
+    <div class="cmsgs" id="cmsgs"></div>
+    <div class="cqk">
+      <button class="cqb" onclick="qk('¿Cómo juego?')">¿Cómo juego?</button>
+      <button class="cqb" onclick="qk('¿Cómo gano estrellas?')">⭐ Estrellas</button>
+      <button class="cqb" onclick="qk('Dame una pista')">💡 Pista</button>
+      <button class="cqb" onclick="qk('¿Qué mundos hay?')">🗺️ Mundos</button>
+    </div>
+    <div class="cir">
+      <input class="ci" id="cin" placeholder="Escribe tu pregunta..." maxlength="120" onkeydown="if(event.key==='Enter')sndChat()"/>
+      <button class="bsnd" onclick="sndChat()">Enviar</button>
+    </div>
+    <!--
+    =========================================================
+    PEGAR AQUÍ EL CÓDIGO DEL CHATBOT DE JOTFORM
+    <scriptsrc='https://cdn.jotfor.ms/agent/embedjs/019e74a8a65a7449a2f9ffee64c97a4201d4/embed.js?autoOpenChatIn=1'>
+</script>
+    =========================================================
+    -->
+  </div>
+</div>
+
+<!-- GITHUB -->
+<div class="mov" id="mGit">
+  <div class="gwin">
+    <div class="ghd"><h2 style="color:#6a1b9a;font-size:17px;">🚀 Publicar en GitHub Pages</h2><button class="bcls" style="background:#9c27b0" onclick="closeM('mGit')">✖</button></div>
+    <div class="mbody">
+      <div class="grow"><div class="gnum">1</div><div class="gtxt">Crea una cuenta en <strong>github.com</strong> si no tienes una.</div></div>
+      <div class="grow"><div class="gnum">2</div><div class="gtxt">Crea un repositorio público llamado <strong>mundo-magico</strong>.</div></div>
+      <div class="grow"><div class="gnum">3</div><div class="gtxt">Sube el archivo <strong>index.html</strong> al repositorio.</div></div>
+      <div class="grow"><div class="gnum">4</div><div class="gtxt">Ve a <strong>Settings → Pages</strong>, selecciona la rama <em>main</em> y guarda.</div></div>
+      <div class="grow"><div class="gnum">5</div><div class="gtxt">Copia el enlace: <em>https://tuusuario.github.io/mundo-magico/</em></div></div>
+      <div class="grow" style="border:none"><div class="gnum">6</div><div class="gtxt">Entrega el enlace de la app y del repositorio a tu docente.</div></div>
+    </div>
+    <div class="mfoot"><button class="bact bnxt" onclick="closeM('mGit')">¡Listo!</button></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN — EDITABLE
+   ============================================================ */
+const CFG={
+  clave:"profe123",
+  avatares:["🦋","🐲","🌙","🦔","🦄","🦅","🐬","🧚","☄️","🦜"],
+  ok:["¡Muy bien! 🎉","¡Excelente! ✨","¡Lo lograste! 🏆","¡Chispitas está feliz! 😊","¡Sigue así, campeón! 🌟","¡Eres increíble! 🦄"],
+  ko:["Casi, intenta otra vez 😊","Observa bien la pista 👀","Muy cerca, vuelve a intentarlo","¡Tú puedes! Inténtalo de nuevo 👍"],
+  key:"mmv3"
+};
+
+/* ============================================================
+   MUNDOS — CONFIGURABLES
+   ============================================================ */
+const MUNDOS=[
+  {id:"emociones",nom:"Emociones",ico:"🎭",tema:"Emociones / Emotions 🇬🇧🇪🇸",tipo:"drag",
+   instr:"Arrastra cada símbolo al estado de ánimo correcto · Match emotion",
+   zonas:[{id:"happy",n:"Happy / Feliz",i:"😊"},{id:"sad",n:"Sad / Triste",i:"😢"},{id:"angry",n:"Angry / Enojado",i:"😠"}],
+   elem:[{id:"e1",n:"Smile",em:"☀️",d:"happy"},{id:"e2",n:"Party",em:"🥳",d:"happy"},{id:"e3",n:"Rain",em:"🌧️",d:"sad"},{id:"e4",n:"Cry",em:"😭",d:"sad"},{id:"e5",n:"Thunder",em:"⚡",d:"angry"},{id:"e6",n:"Broken",em:"💔",d:"sad"}]},
+  {id:"colores",nom:"Colores",ico:"🎨",tema:"Colores / Colors 🇬🇧🇪🇸",tipo:"line",
+   instr:"Une con flecha cada objeto con su color · Draw a line",
+   zonas:[{id:"rojo",n:"Red / Rojo",i:"🔴"},{id:"azul",n:"Blue / Azul",i:"🔵"},{id:"amarillo",n:"Yellow / Amarillo",i:"🟡"},{id:"verde",n:"Green / Verde",i:"🟢"}],
+   elem:[{id:"c1",n:"Apple",em:"🍎",d:"rojo"},{id:"c2",n:"Water",em:"💧",d:"azul"},{id:"c3",n:"Lemon",em:"🍋",d:"amarillo"},{id:"c4",n:"Frog",em:"🐸",d:"verde"},{id:"c5",n:"Fire",em:"🔥",d:"rojo"},{id:"c6",n:"Sun",em:"☀️",d:"amarillo"}]},
+  {id:"vocales",nom:"Vocales",ico:"🔤",tema:"Vocales / Vowels 🇬🇧🇪🇸",tipo:"drag",
+   instr:"Arrastra al vocal correcto · Drag to the matching vowel",
+   zonas:[{id:"va",n:"A",i:"🅰️"},{id:"ve",n:"E",i:"📗"},{id:"vi",n:"I",i:"📘"},{id:"vo",n:"O",i:"🟠"},{id:"vu",n:"U",i:"🟣"}],
+   elem:[{id:"v1",n:"Ant / Abeja",em:"🐜",d:"va"},{id:"v2",n:"Elephant",em:"🐘",d:"ve"},{id:"v3",n:"Igloo",em:"🏔️",d:"vi"},{id:"v4",n:"Orange",em:"🍊",d:"vo"},{id:"v5",n:"Umbrella",em:"☂️",d:"vu"},{id:"v6",n:"Egg / Huevo",em:"🥚",d:"ve"}]},
+  {id:"numeros",nom:"Números",ico:"🔢",tema:"Números / Numbers 🇬🇧🇪🇸",tipo:"line",
+   instr:"Une cada grupo con su número · Connect groups to numbers",
+   zonas:[{id:"n1",n:"1 One",i:"1️⃣"},{id:"n2",n:"2 Two",i:"2️⃣"},{id:"n3",n:"3 Three",i:"3️⃣"},{id:"n4",n:"4 Four",i:"4️⃣"},{id:"n5",n:"5 Five",i:"5️⃣"}],
+   elem:[{id:"nu1",n:"1 Moon",em:"🌙",d:"n1"},{id:"nu2",n:"2 Stars",em:"⭐⭐",d:"n2"},{id:"nu3",n:"3 Flowers",em:"🌸🌸🌸",d:"n3"},{id:"nu4",n:"4 Fish",em:"🐟🐟🐟🐟",d:"n4"},{id:"nu5",n:"5 Apples",em:"🍎×5",d:"n5"}]},
+  {id:"frutas",nom:"Frutas",ico:"🍎",tema:"Frutas / Fruits 🇬🇧🇪🇸",tipo:"drag",
+   instr:"Clasifica frutas y verduras · Sort fruits and vegetables",
+   zonas:[{id:"fruta",n:"Fruits / Frutas",i:"🍓"},{id:"verdura",n:"Vegetables / Verduras",i:"🥦"}],
+   elem:[{id:"f1",n:"Grapes",em:"🍇",d:"fruta"},{id:"f2",n:"Carrot",em:"🥕",d:"verdura"},{id:"f3",n:"Watermelon",em:"🍉",d:"fruta"},{id:"f4",n:"Broccoli",em:"🥦",d:"verdura"},{id:"f5",n:"Mango",em:"🥭",d:"fruta"},{id:"f6",n:"Corn",em:"🌽",d:"verdura"}]},
+  {id:"figuras",nom:"Figuras",ico:"🔷",tema:"Figuras Geométricas 🇪🇸",tipo:"drag",
+   instr:"Arrastra cada objeto a su figura geométrica",
+   zonas:[{id:"circ",n:"Círculo",i:"⚪"},{id:"cuad",n:"Cuadrado",i:"⬛"},{id:"tri",n:"Triángulo",i:"🔺"},{id:"rect",n:"Rectángulo",i:"▬"}],
+   elem:[{id:"g1",n:"Pelota",em:"⚽",d:"circ"},{id:"g2",n:"Regalo",em:"🎁",d:"cuad"},{id:"g3",n:"Pizza",em:"🍕",d:"tri"},{id:"g4",n:"Reloj",em:"⏰",d:"circ"},{id:"g5",n:"Puerta",em:"🚪",d:"rect"},{id:"g6",n:"Cohete",em:"🚀",d:"tri"}]},
+  {id:"cuerpo",nom:"Cuerpo",ico:"🫁",tema:"Partes del Cuerpo 🇪🇸",tipo:"line",
+   instr:"Une cada accesorio con la parte del cuerpo donde se usa",
+   zonas:[{id:"cab",n:"Cabeza",i:"👤"},{id:"man",n:"Manos",i:"🖐️"},{id:"pie",n:"Pies",i:"👣"},{id:"cor",n:"Cuerpo",i:"👕"}],
+   elem:[{id:"p1",n:"Gorra",em:"🧢",d:"cab"},{id:"p2",n:"Guantes",em:"🧤",d:"man"},{id:"p3",n:"Zapatos",em:"👟",d:"pie"},{id:"p4",n:"Gafas",em:"👓",d:"cab"},{id:"p5",n:"Camisa",em:"👕",d:"cor"},{id:"p6",n:"Calcetines",em:"🧦",d:"pie"}]},
+  {id:"animales",nom:"Animales",ico:"🐾",tema:"Mundo Animales 🇪🇸",tipo:"line",
+   instr:"Une cada animal con el lugar donde vive",
+   zonas:[{id:"granja",n:"Granja",i:"🚜"},{id:"mar",n:"Mar",i:"🌊"},{id:"selva",n:"Selva",i:"🌿"},{id:"cielo",n:"Cielo",i:"☁️"}],
+   elem:[{id:"a1",n:"Vaca",em:"🐄",d:"granja"},{id:"a2",n:"Pez",em:"🐟",d:"mar"},{id:"a3",n:"León",em:"🦁",d:"selva"},{id:"a4",n:"Pájaro",em:"🐦",d:"cielo"},{id:"a5",n:"Cerdo",em:"🐷",d:"granja"},{id:"a6",n:"Delfín",em:"🐬",d:"mar"}]},
+  {id:"clasif",nom:"Clasificación",ico:"📦",tema:"Clasificación de Objetos 🇪🇸",tipo:"drag",
+   instr:"Clasifica cada objeto en su categoría correcta",
+   zonas:[{id:"jug",n:"Juguetes",i:"🧸"},{id:"tran",n:"Transportes",i:"🚌"},{id:"com",n:"Comida",i:"🍽️"},{id:"ropa",n:"Ropa",i:"👗"}],
+   elem:[{id:"k1",n:"Balón",em:"⚽",d:"jug"},{id:"k2",n:"Avión",em:"✈️",d:"tran"},{id:"k3",n:"Pizza",em:"🍕",d:"com"},{id:"k4",n:"Vestido",em:"👗",d:"ropa"},{id:"k5",n:"Tren",em:"🚂",d:"tran"},{id:"k6",n:"Muñeca",em:"🪆",d:"jug"},{id:"k7",n:"Burger",em:"🍔",d:"com"},{id:"k8",n:"Sombrero",em:"🎩",d:"ropa"}]}
+];
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+let player=null,cidx=0,hits=0,tries=0,total=0,score=0,done=false,placed={};
+let pdown=false,dcard=null,sx=0,sy=0,ox=0,oy=0,aline=null;
+let selAv=CFG.avatares[0];
+
+/* ============================================================
+   LOCALSTORAGE
+   ============================================================ */
+const db=()=>JSON.parse(localStorage.getItem(CFG.key)||'{}');
+const sdb=d=>localStorage.setItem(CFG.key,JSON.stringify(d));
+
+function getPlayer(name,group,av){
+  const d=db();
+  const ex=Object.values(d).find(p=>p.nombre===name&&p.grupo===group);
+  if(ex)return ex;
+  const id='p'+Date.now();
+  const p={id,nombre:name,grupo:group,avatar:av,progreso:{},historial:[],
+    totalEst:0,totalPts:0,totalInt:0,mundos:0,avance:0,
+    fCreacion:hoy(),fActual:hoy()};
+  d[id]=p;sdb(d);return p;
+}
+
+function saveProgress(p,mid,stars,pts,ints){
+  const d=db();if(!d[p.id])return;
+  const pp=d[p.id];
+  const prev=pp.progreso[mid];
+  const mejor=!prev||pts>(prev.pts||0);
+  pp.progreso[mid]={ok:true,pts:mejor?pts:(prev.pts||0),stars:mejor?stars:Math.max(prev.stars||0,stars),ints:mejor?ints:(prev.ints||ints),fecha:hoy()};
+  const prs=Object.values(pp.progreso);
+  pp.mundos=prs.length;
+  pp.totalEst=prs.reduce((s,x)=>s+(x.stars||0),0);
+  pp.totalPts=prs.reduce((s,x)=>s+(x.pts||0),0);
+  pp.totalInt=prs.reduce((s,x)=>s+(x.ints||0),0);
+  pp.avance=Math.round(pp.mundos/MUNDOS.length*100);
+  pp.fActual=hoy();
+  pp.historial.push({mid,stars,pts,ints,fecha:hoy()});
+  if(pp.historial.length>50)pp.historial=pp.historial.slice(-50);
+  d[p.id]=pp;sdb(d);player=pp;
+}
+
+function allPlayers(){
+  return Object.values(db()).sort((a,b)=>{
+    if(b.totalEst!==a.totalEst)return b.totalEst-a.totalEst;
+    if(b.totalPts!==a.totalPts)return b.totalPts-a.totalPts;
+    if(a.totalInt!==b.totalInt)return a.totalInt-b.totalInt;
+    return b.avance-a.avance;
+  });
+}
+
+/* ============================================================
+   INIT SPLASH
+   ============================================================ */
+window.addEventListener('DOMContentLoaded',()=>{
+  const g=document.getElementById('avGrid');
+  CFG.avatares.forEach(av=>{
+    const b=document.createElement('button');
+    b.className='av-btn';b.textContent=av;
+    b.onclick=()=>{selAv=av;document.querySelectorAll('.av-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');};
+    g.appendChild(b);
+  });
+  g.firstChild.classList.add('sel');
+  fillPrev();
+  addBot('¡Hola! 🌟 Soy Chispitas. Puedo ayudarte con instrucciones y pistas. ¿Qué necesitas?');
+});
+
+function fillPrev(){
+  const s=document.getElementById('prevSel');
+  s.innerHTML='<option value="">— Jugadores guardados —</option>';
+  allPlayers().forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=`${p.avatar} ${p.nombre} — ${p.grupo}`;s.appendChild(o);});
+}
+
+function loadPrev(){
+  const id=document.getElementById('prevSel').value;if(!id)return;
+  const p=db()[id];if(!p)return;
+  document.getElementById('rName').value=p.nombre;
+  document.getElementById('rGroup').value=p.grupo;
+  selAv=p.avatar;
+  document.querySelectorAll('.av-btn').forEach(b=>b.classList.toggle('sel',b.textContent===p.avatar));
+}
+
+function startApp(){
+  const n=document.getElementById('rName').value.trim();
+  const g=document.getElementById('rGroup').value;
+  if(!n){toast('✏️ ¡Escribe tu nombre!');return;}
+  if(!g){toast('📚 ¡Selecciona tu grupo!');return;}
+  player=getPlayer(n,g,selAv);
+  document.getElementById('pchip').textContent=`${selAv} ${n}`;
+  document.getElementById('splash').style.display='none';
+  document.getElementById('app').style.display='block';
+  buildNav();buildWList();loadLv(0);
+}
+
+function goSplash(){document.getElementById('app').style.display='none';document.getElementById('splash').style.display='flex';fillPrev();}
+
+/* ============================================================
+   NAV & NIVELES
+   ============================================================ */
+function buildNav(){
+  const nav=document.getElementById('lnav');nav.innerHTML='';
+  MUNDOS.forEach((m,i)=>{
+    const b=document.createElement('button');
+    b.className=`lbtn lb${i}`;b.textContent=`${m.ico} ${m.nom}`;
+    b.onclick=()=>loadLv(i);nav.appendChild(b);
+  });
+}
+
+function loadLv(i){
+  cidx=i;const m=MUNDOS[i];
+  hits=0;tries=0;total=m.elem.length;score=0;done=false;placed={};
+  document.querySelectorAll('.lbtn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.getElementById('tbadge').textContent=m.tema;
+  document.getElementById('instrTxt').textContent=m.instr;
+  document.getElementById('phint').textContent=m.tipo==='line'?'👉 Toca y desliza la flecha hasta su lugar':'👇 ¡Arrastra al lugar correcto!';
+  clrCanvas();
+
+  const dw=document.getElementById('dwrap');dw.innerHTML='';
+  m.zonas.forEach(z=>{
+    const d=document.createElement('div');
+    d.className='tz';d.id='z_'+z.id;d.dataset.id=z.id;
+    d.innerHTML=`<div class="ti">${z.i}</div><div class="tn">${z.n}</div><div class="tcol" id="col_${z.id}"></div>`;
+    d.addEventListener('dragover',e=>e.preventDefault());
+    d.addEventListener('dragenter',()=>{if(m.tipo==='drag')d.classList.add('dov');});
+    d.addEventListener('dragleave',()=>d.classList.remove('dov'));
+    dw.appendChild(d);
+  });
+
+  const pool=document.getElementById('ipool');pool.innerHTML='';
+  shuffle([...m.elem]).forEach(it=>{
+    const c=document.createElement('div');
+    c.className='dcard';c.id='c_'+it.id;c.dataset.id=it.id;c.dataset.dest=it.d;
+    c.innerHTML=`<div class="dem">${it.em}</div><div class="dlb">${it.n}</div>`;
+    c.addEventListener('pointerdown',onPD);
+    pool.appendChild(c);
+  });
+  updUI();
+  document.getElementById('fbbox').textContent='🌟 ¡Empieza! Elige un objeto.';
+}
+
+/* ============================================================
+   DRAG & LINE — POINTER EVENTS
+   ============================================================ */
+function onPD(e){
+  if(done)return;
+  const c=e.currentTarget;if(c.classList.contains('placed'))return;
+  e.preventDefault();pdown=true;dcard=c;c.setPointerCapture(e.pointerId);
+  const r=c.getBoundingClientRect();
+  sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;
+  if(MUNDOS[cidx].tipo==='drag'){
+    c.style.width=r.width+'px';c.style.height=r.height+'px';c.style.left=r.left+'px';c.style.top=r.top+'px';
+    c.classList.add('dragging');
+  }else{mkLine(c);}
+  window.addEventListener('pointermove',onPM);
+  window.addEventListener('pointerup',onPU);
+}
+
+function onPM(e){
+  if(!pdown||!dcard)return;
+  if(MUNDOS[cidx].tipo==='drag'){
+    dcard.style.left=(ox+e.clientX-sx)+'px';dcard.style.top=(oy+e.clientY-sy)+'px';
+    clrHL();const z=zoneAt(e.clientX,e.clientY);if(z)z.classList.add('dov');
+  }else{
+    if(aline){const ar=document.getElementById('arena').getBoundingClientRect();aline.setAttribute('x2',e.clientX-ar.left);aline.setAttribute('y2',e.clientY-ar.top);}
+  }
+}
+
+function onPU(e){
+  if(!pdown||!dcard)return;
+  window.removeEventListener('pointermove',onPM);window.removeEventListener('pointerup',onPU);
+  const c=dcard;pdown=false;dcard=null;clrHL();
+  const z=zoneAt(e.clientX,e.clientY);tries++;
+  if(z&&z.dataset.id===c.dataset.dest){onOk(c,z);}else{onFail(c);}
+  if(MUNDOS[cidx].tipo==='drag'){c.classList.remove('dragging');c.style.cssText='';}
+  else if(!placed[c.id]&&aline){aline.remove();}
+  updUI();
+}
+
+function onOk(c,z){
+  hits++;score+=10;c.classList.add('placed');placed[c.id]={z:z.dataset.id};
+  if(MUNDOS[cidx].tipo==='line'&&aline){
+    const ar=document.getElementById('arena').getBoundingClientRect();
+    const cr=c.getBoundingClientRect(),zr=z.getBoundingClientRect();
+    aline.setAttribute('x1',(cr.left+cr.width/2)-ar.left);aline.setAttribute('y1',(cr.top+cr.height/2)-ar.top);
+    aline.setAttribute('x2',(zr.left+zr.width/2)-ar.left);aline.setAttribute('y2',(zr.top+zr.height/2)-ar.top);
+    aline.setAttribute('stroke','#43a047');aline.id='l_'+c.id;
+  }
+  const mn=document.createElement('span');mn.className='mini';mn.textContent=c.querySelector('.dem').textContent;
+  document.getElementById('col_'+z.dataset.id).appendChild(mn);
+  tone('ok');document.getElementById('fbbox').textContent=rnd(CFG.ok);
+  if(hits===total)finish();
+}
+
+function onFail(c){
+  score=Math.max(0,score-2);tone('ko');
+  c.animate([{transform:'translateX(0)'},{transform:'translateX(-12px)'},{transform:'translateX(12px)'},{transform:'translateX(0)'}],{duration:260});
+  document.getElementById('fbbox').textContent=rnd(CFG.ko);
+}
+
+function finish(){
+  done=true;
+  const prec=hits/Math.max(tries,1);
+  const stars=prec>=0.9?3:prec>=0.7?2:1;
+  document.getElementById('stDisp').textContent='⭐'.repeat(stars);
+  confetti();tone('win');
+  if(player)saveProgress(player,MUNDOS[cidx].id,stars,score,tries);
+  buildWList();
+  document.getElementById('fbbox').textContent=`🏆 ¡Fabuloso! ${stars}⭐ y ${score} puntos. ¡Sigue explorando!`;
+  updProg();
+}
+
+/* ============================================================
+   UI
+   ============================================================ */
+function updUI(){
+  document.getElementById('hDisp').textContent=hits;
+  document.getElementById('tDisp').textContent=total;
+  document.getElementById('scDisp').textContent=score;
+  document.getElementById('trDisp').textContent=tries;
+  if(!done)document.getElementById('stDisp').textContent='0';
+  updProg();
+}
+
+function updProg(){
+  if(!player)return;
+  const p=db()[player.id];if(!p)return;
+  const pct=p.avance||0;
+  document.getElementById('pbar').style.width=pct+'%';
+  document.getElementById('pct').textContent=pct;
+}
+
+function buildWList(){
+  const wl=document.getElementById('wlist');wl.innerHTML='';
+  const p=player?db()[player.id]:null;
+  MUNDOS.forEach(m=>{
+    const pr=p&&p.progreso[m.id];
+    const d=document.createElement('div');d.className='witem';
+    d.innerHTML=`<span>${m.ico} ${m.nom}</span><span class="${pr?'wdone':'wpend'}">${pr?'⭐'.repeat(pr.stars)+'✅':'⏳'}</span>`;
+    wl.appendChild(d);
+  });
+}
+
+function nextLv(){loadLv((cidx+1)%MUNDOS.length);toast('➡️ Siguiente mundo');}
+function restartLv(){loadLv(cidx);toast('🔄 Reiniciado');}
+
+/* ============================================================
+   SVG
+   ============================================================ */
+function mkLine(c){
+  const svg=document.getElementById('svg');
+  const ar=document.getElementById('arena').getBoundingClientRect();
+  const cr=c.getBoundingClientRect();
+  const x1=(cr.left+cr.width/2)-ar.left,y1=(cr.top+cr.height/2)-ar.top;
+  const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x1);l.setAttribute('y2',y1);
+  l.setAttribute('stroke','#ff9800');l.setAttribute('stroke-width','5');l.setAttribute('stroke-linecap','round');l.setAttribute('opacity','0.85');
+  svg.appendChild(l);aline=l;
+}
+function clrCanvas(){document.getElementById('svg').innerHTML='';aline=null;}
+function clrHL(){document.querySelectorAll('.tz').forEach(z=>z.classList.remove('dov'));}
+function zoneAt(x,y){for(const el of document.elementsFromPoint(x,y)){const z=el.closest('.tz');if(z)return z;}return null;}
+
+/* ============================================================
+   RANKING
+   ============================================================ */
+function openRank(){
+  const body=document.getElementById('rankBody');body.innerHTML='';
+  const players=allPlayers();
+  if(!players.length){body.innerHTML='<div style="text-align:center;padding:20px;color:#546e7a;font-weight:bold;">¡Sé el primero en jugar! 🏆</div>';
+  }else{
+    players.forEach((p,i)=>{
+      const med=i===0?'🥇':i===1?'🥈':i===2?'🥉':'👤';
+      const c=document.createElement('div');c.className='rcrd';
+      c.innerHTML=`<div class="rnum">${i+1}</div><div style="font-size:26px">${p.avatar}</div>
+        <div style="flex:1"><div class="rname">${med} ${esc(p.nombre)}</div>
+        <div class="rsub">📚 ${esc(p.grupo)} · 🗓️ ${p.fActual}</div>
+        <div class="rstats">
+          <span style="color:#fbc02d">⭐ ${p.totalEst}</span>
+          <span style="color:#43a047">🏅 ${p.totalPts}pts</span>
+          <span style="color:#1565c0">🗺️ ${p.mundos}/${MUNDOS.length}</span>
+          <span style="color:#9c27b0">📊 ${p.avance}%</span>
+        </div></div>`;
+      body.appendChild(c);
+    });
+  }
+  openM('mRank');
+}
+
+function clearRank(){if(confirm('¿Borrar todos los datos?')){localStorage.removeItem(CFG.key);toast('🗑️ Listo');openRank();}}
+
+/* ============================================================
+   PANEL PROFE
+   ============================================================ */
+function openProfe(){openM('mPwd');document.getElementById('pwdIn').value='';document.getElementById('pwdErr').textContent='';}
+
+function chkPwd(){
+  if(document.getElementById('pwdIn').value.trim()===CFG.clave){
+    closeM('mPwd');fillGrpFilter();renderProfe();openM('mProfe');
+  }else{document.getElementById('pwdErr').textContent='❌ Clave incorrecta';}
+}
+
+function fillGrpFilter(){
+  const s=document.getElementById('pgrp');s.innerHTML='<option value="">Todos los grupos</option>';
+  [...new Set(allPlayers().map(p=>p.grupo))].forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;s.appendChild(o);});
+}
+
+function renderProfe(){
+  const sr=document.getElementById('psrch').value.toLowerCase();
+  const gr=document.getElementById('pgrp').value;
+  const so=document.getElementById('psort').value;
+  let ps=allPlayers();
+  if(sr)ps=ps.filter(p=>p.nombre.toLowerCase().includes(sr)||p.grupo.toLowerCase().includes(sr));
+  if(gr)ps=ps.filter(p=>p.grupo===gr);
+  if(so==='score')ps.sort((a,b)=>b.totalPts-a.totalPts);
+  else if(so==='name')ps.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  else if(so==='date')ps.sort((a,b)=>b.fActual.localeCompare(a.fActual));
+  else if(so==='prog')ps.sort((a,b)=>b.avance-a.avance);
+  const tb=document.getElementById('ptbody');tb.innerHTML='';
+  ps.forEach((p,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td style="font-size:18px;text-align:center">${p.avatar}</td>
+      <td style="font-weight:bold">${esc(p.nombre)}</td><td>${esc(p.grupo)}</td>
+      <td style="text-align:center">${p.mundos}/${MUNDOS.length}</td>
+      <td style="color:#fbc02d;text-align:center">${p.totalEst}</td>
+      <td style="color:#43a047;text-align:center">${p.totalPts}</td>
+      <td style="text-align:center">${p.totalInt}</td>
+      <td style="text-align:center">${p.avance}%</td>
+      <td style="font-size:11px">${p.fActual}</td>
+      <td><button class="bdel" onclick="delP('${p.id}')">🗑️</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function delP(id){if(!confirm('¿Eliminar?'))return;const d=db();delete d[id];sdb(d);renderProfe();toast('✅ Eliminado');}
+function clearAll(){if(!confirm('¿Borrar TODOS los datos?'))return;localStorage.removeItem(CFG.key);renderProfe();toast('🗑️ Datos eliminados');}
+
+function expCSV(){
+  const ps=allPlayers();
+  const rows=[['#','Nombre','Grupo','Avatar','Mundos','Estrellas','Puntos','Intentos','Avance%','Fecha']];
+  ps.forEach((p,i)=>rows.push([i+1,p.nombre,p.grupo,p.avatar,p.mundos,p.totalEst,p.totalPts,p.totalInt,p.avance,p.fActual]));
+  dl('exploradores.csv','data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n')));
+}
+function expJSON(){dl('exploradores.json','data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(allPlayers(),null,2)));}
+function dl(fn,href){const a=document.createElement('a');a.href=href;a.download=fn;a.click();}
+
+/* ============================================================
+   CHAT CHISPITAS
+   ============================================================ */
+const RESP={
+  'cómo juego':'¡Hola explorador! 🌟 Escoge un mundo, luego arrastra los objetos a su lugar correcto o une con una flecha los pares. ¡Cada acierto suma 10 puntos!',
+  'cómo gano estrellas':'Ganas ⭐ según precisión: 3 estrellas si aciertas casi todo, 2 si te equivocas poco, 1 si necesitas muchos intentos.',
+  'dame una pista':'💡 Lee el nombre del objeto y el nombre de cada canasta. ¡El color o la categoría te dan la clave!',
+  'qué mundos hay':`🗺️ Hay ${MUNDOS.length} mundos: ${MUNDOS.map(m=>m.ico+' '+m.nom).join(', ')}. ¡Los primeros 5 son bilingües!`,
+  'default':'¡Hola! 🤖 Soy Chispitas. Puedo ayudarte con instrucciones, pistas y consejos. ¿Qué necesitas?'
+};
+
+function sndChat(){
+  const inp=document.getElementById('cin');const t=inp.value.trim();if(!t)return;
+  addUsr(t);inp.value='';
+  setTimeout(()=>{const k=Object.keys(RESP).find(k=>t.toLowerCase().includes(k));addBot(RESP[k||'default']);},380);
+}
+function qk(t){document.getElementById('cin').value=t;sndChat();}
+function addBot(t){addMsg('cbot','🤖 '+t);}
+function addUsr(t){addMsg('cusr',t);}
+function addMsg(cls,t){const d=document.createElement('div');d.className='cbbl '+cls;d.textContent=t;const m=document.getElementById('cmsgs');m.appendChild(d);m.scrollTop=9999;}
+
+/* ============================================================
+   MODALES
+   ============================================================ */
+function openM(id){document.getElementById(id).classList.add('active');}
+function closeM(id){document.getElementById(id).classList.remove('active');}
+
+/* ============================================================
+   AUDIO
+   ============================================================ */
+function tone(t){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    const ctx=new AC(),now=ctx.currentTime;
+    if(t==='ok'){[440,554,659,880].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;g.gain.setValueAtTime(.09,now+i*.08);g.gain.exponentialRampToValueAtTime(.001,now+i*.08+.15);o.start(now+i*.08);o.stop(now+i*.08+.16);});}
+    else if(t==='ko'){const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.setValueAtTime(220,now);o.frequency.linearRampToValueAtTime(140,now+.25);g.gain.setValueAtTime(.13,now);g.gain.exponentialRampToValueAtTime(.001,now+.25);o.start(now);o.stop(now+.26);}
+    else{[523,659,784,1047].forEach(f=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;g.gain.setValueAtTime(.07,now);g.gain.exponentialRampToValueAtTime(.001,now+.85);o.start(now);o.stop(now+.86);});}
+  }catch(e){}
+}
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+function confetti(){
+  const l=document.getElementById('cl');l.innerHTML='';
+  const cols=['#ff4081','#00e676','#00b0ff','#ffea00','#d500f9','#ff9100','#76ff03'];
+  for(let i=0;i<85;i++){const p=document.createElement('div');p.className='cp';p.style.left=Math.random()*100+'vw';p.style.backgroundColor=rnd(cols);p.style.animationDelay=Math.random()*.4+'s';p.style.animationDuration=(1.2+Math.random()*1.5)+'s';l.appendChild(p);setTimeout(()=>p.remove(),3200);}
+}
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2600);}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function hoy(){return new Date().toISOString().split('T')[0];}
+</script>
+</body>
+<script src='https://cdn.jotfor.ms/agent/embedjs/019e74a8a65a7449a2f9ffee64c97a4201d4/embed.js?autoOpenChatIn=1'>
+</script>
+</html>
